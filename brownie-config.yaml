@@ -14,6 +14,8 @@ wallets:
     private_key: ${D1_PRIVATE_KEY}
 
 networks:
+  default: ganache-local-persistant
+  
   development:
     verify: False
     local: True
