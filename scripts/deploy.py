@@ -12,8 +12,10 @@ def deploy_fund_me():
     else:
         eth_usd_price_feed = config['networks'][_network]['eth_usd_price_feed']
 
-    FundMe.deploy(eth_usd_price_feed, {'from': account}, 
+    fund_me = FundMe.deploy(eth_usd_price_feed, {'from': account}, 
                   publish_source=config['networks'][_network]['verify'])
+    
+    return fund_me
 
 def main():
     deploy_fund_me()
