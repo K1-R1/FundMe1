@@ -33,7 +33,7 @@ contract FundMe {
 
     function getETHUSDPrice() public view returns (uint256) {
         (, int256 answer, , , ) = priceFeed.latestRoundData();
-        return uint256(answer * 10**-8);
+        return uint256(answer / (10**8));
     }
 
     function getUSDValue(uint256 ethQuantity) public view returns (uint256) {
