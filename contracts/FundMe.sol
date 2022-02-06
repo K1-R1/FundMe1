@@ -6,13 +6,13 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract FundMe {
     mapping(address => uint256) public addressToAmountFunded;
-
     address[] public funders;
-
     address payable public owner;
+    AggregatorV3Interface public priceFeed;
 
-    constructor() {
+    constructor(address _priceFeed) {
         owner = payable(msg.sender);
+        priceFeed = AggregatorV3Interface(_priceFeed);
     }
 
     modifier onlyOwner() {
@@ -28,18 +28,12 @@ contract FundMe {
     }
 
     function getVersion() public view returns (uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(
-            0x8A753747A1Fa494EC906cE90E9f37563A8AF630e
-        );
         return priceFeed.version();
     }
 
     function getETHUSDPrice() public view returns (uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(
-            0x8A753747A1Fa494EC906cE90E9f37563A8AF630e
-        );
         (, int256 answer, , , ) = priceFeed.latestRoundData();
-        return uint256(answer);
+        return uint256(answer * 10**-8);
     }
 
     function getUSDValue(uint256 ethQuantity) public view returns (uint256) {
