@@ -12,3 +12,19 @@ wallets:
   dev_account_1: 
     address: ${D1_ADDRESS}
     private_key: ${D1_PRIVATE_KEY}
+
+networks:
+  default: ganache-local-persistant
+  
+  development:
+    verify: False
+    local: True
+
+  ganache-local-persistant:
+    verify: False
+    local: True
+
+  rinkeby:
+    verify: True
+    local: False
+    eth_usd_price_feed: '0x8A753747A1Fa494EC906cE90E9f37563A8AF630e'
