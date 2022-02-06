@@ -21,7 +21,7 @@ contract FundMe {
     }
 
     function fund() public payable {
-        uint256 minimumUSD = 25;
+        uint256 minimumUSD = 25 * 10**18;
         require(getUSDValue(msg.value) >= minimumUSD, "Minimum deposit of $25");
         addressToAmountFunded[msg.sender] += msg.value;
         funders.push(msg.sender);
@@ -33,12 +33,12 @@ contract FundMe {
 
     function getETHUSDPrice() public view returns (uint256) {
         (, int256 answer, , , ) = priceFeed.latestRoundData();
-        return uint256(answer / (10**8));
+        return uint256(answer * 10**10);
     }
 
     function getUSDValue(uint256 ethQuantity) public view returns (uint256) {
         uint256 ethusdPrice = getETHUSDPrice();
-        uint256 ethQuantityUSDValue = ethusdPrice * ethQuantity;
+        uint256 ethQuantityUSDValue = (ethusdPrice * ethQuantity) / 10**18;
         return ethQuantityUSDValue;
     }
 
@@ -48,5 +48,12 @@ contract FundMe {
             addressToAmountFunded[funders[i]] = 0;
         }
         funders = new address[](0);
+    }
+
+    function getETHEntranceFee() public view returns (uint256) {
+        uint256 minimumUSD = 25 * 10**18;
+        uint256 price = getETHUSDPrice();
+        uint256 precision = 1 * 10**18;
+        return (minimumUSD * precision) / price;
     }
 }
