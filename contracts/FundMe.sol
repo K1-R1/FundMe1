@@ -6,68 +6,52 @@ import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract FundMe {
     mapping(address => uint256) public addressToAmountFunded;
-    address[] public funders;
-    address public owner;
-    AggregatorV3Interface public priceFeed;
 
-    constructor(address _priceFeed) {
-        priceFeed = AggregatorV3Interface(_priceFeed);
-        owner = msg.sender;
+    address[] public funders;
+
+    address payable public owner;
+
+    constructor() {
+        owner = payable(msg.sender);
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can access this function");
+        _;
     }
 
     function fund() public payable {
-        uint256 minimumUSD = 50 * 10**18;
-        require(
-            getConversionRate(msg.value) >= minimumUSD,
-            "You need to spend more ETH!"
-        );
+        uint256 minimumUSD = 25;
+        require(getUSDValue(msg.value) >= minimumUSD, "Minimum deposit of $25");
         addressToAmountFunded[msg.sender] += msg.value;
         funders.push(msg.sender);
     }
 
     function getVersion() public view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(
+            0x8A753747A1Fa494EC906cE90E9f37563A8AF630e
+        );
         return priceFeed.version();
     }
 
-    function getPrice() public view returns (uint256) {
+    function getETHUSDPrice() public view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(
+            0x8A753747A1Fa494EC906cE90E9f37563A8AF630e
+        );
         (, int256 answer, , , ) = priceFeed.latestRoundData();
-        return uint256(answer * 10000000000);
+        return uint256(answer);
     }
 
-    // 1000000000
-    function getConversionRate(uint256 ethAmount)
-        public
-        view
-        returns (uint256)
-    {
-        uint256 ethPrice = getPrice();
-        uint256 ethAmountInUsd = (ethPrice * ethAmount) / 1000000000000000000;
-        return ethAmountInUsd;
-    }
-
-    function getEntranceFee() public view returns (uint256) {
-        // minimumUSD
-        uint256 minimumUSD = 50 * 10**18;
-        uint256 price = getPrice();
-        uint256 precision = 1 * 10**18;
-        return (minimumUSD * precision) / price;
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
+    function getUSDValue(uint256 ethQuantity) public view returns (uint256) {
+        uint256 ethusdPrice = getETHUSDPrice();
+        uint256 ethQuantityUSDValue = ethusdPrice * ethQuantity;
+        return ethQuantityUSDValue;
     }
 
     function withdraw() public payable onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
-
-        for (
-            uint256 funderIndex = 0;
-            funderIndex < funders.length;
-            funderIndex++
-        ) {
-            address funder = funders[funderIndex];
-            addressToAmountFunded[funder] = 0;
+        owner.transfer(address(this).balance);
+        for (uint256 i = 0; i < funders.length; i++) {
+            addressToAmountFunded[funders[i]] = 0;
         }
         funders = new address[](0);
     }
