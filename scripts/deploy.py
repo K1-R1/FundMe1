@@ -6,7 +6,7 @@ def deploy_fund_me():
     
     _network = network.show_active()
     print(f"Active network: {_network}")
-    if config['networks'][_network]['local']:
+    if config['networks'][_network]['local'] is True:
         deploy_mocks()
         eth_usd_price_feed = MockV3Aggregator[-1].address
     else:
