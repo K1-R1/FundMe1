@@ -8,7 +8,7 @@ def test_can_fund_and_withdraw():
     
     account = get_account()
     fund_me = deploy_fund_me()
-    eth_entrance_fee = fund_me.getETHEntranceFee()
+    eth_entrance_fee = fund_me.getETHEntranceFee() + 100
     
     tx1 = fund_me.fund({'from': account, 'value': eth_entrance_fee})
     tx1.wait(1)
@@ -19,7 +19,7 @@ def test_can_fund_and_withdraw():
     assert fund_me.addressToAmountFunded(account.address) == 0
     
 def test_only_owner_can_withdraw():
-    if config['networks'][network.show_active()]['local'] is False:
+    if not config['networks'][network.show_active()]['local'] is True:
         pytest.skip('Only tested on local networkss')
 
     fund_me = deploy_fund_me()
